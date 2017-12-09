@@ -15,6 +15,33 @@ import splunk.util
 
 var_expandvars_re = re.compile(r'\AENV\((.*)\)$')
 var_shell_re = re.compile(r'\ASHELL\((.*)\)$')
+decimal_to_ascii = {
+    '_33': '!',
+    '_34': '"',
+    '_36': '$',
+    '_37': '%',
+    '_38': '&',
+    '_39': '\'',
+    '_40': '(',
+    '_41': ')',
+    '_42': '*',
+    '_43': '+',
+    '_44': ',',
+    '_45': '-',
+    '_46': '.',
+    '_47': '/',
+    '_58': ':',
+    '_59': ';',
+    '_60': '<',
+    '_61': '=',
+    '_62': '>',
+    '_63': '?',
+    '_64': '@',
+    '_91': '[',
+    '_92': '\\',
+    '_93': ']',
+    '_94': '^'
+}
 
 
 def main():
@@ -41,7 +68,8 @@ def configure():
     """
     # Allow to set any configurations with this
     conf_updates = {}
-    for env, val in os.environ.iteritems():
+    for _env, val in os.environ.iteritems():
+        env = __convert_variable_name(_env)
         if env.startswith("CONF__"):
             parts = env.split("__")[1:]
             conf_file_name = None
@@ -72,6 +100,12 @@ def configure():
         if not os.path.isdir(folder):
             os.makedirs(folder)
         splunk.clilib.cli_common.writeConfFile(conf_file, conf)
+
+
+def __convert_variable_name(val):
+    for binary, ascii in decimal_to_ascii.items():
+        val = val.replace(binary, ascii)
+    return val
 
 
 def __get_value(val):
